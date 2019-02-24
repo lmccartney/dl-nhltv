@@ -1,5 +1,5 @@
 import json
-import cookielib
+import http.cookiejar
 from datetime import datetime
 import os
 import subprocess
@@ -19,9 +19,9 @@ UA_PC = 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gec
 UA_PS4 = 'PS4Application libhttp/1.000 (PS4) libhttp/3.15 (PlayStation 4)'
 
 
-def tprint(outString):
-    outString = datetime.now().strftime('%m/%d/%y %H:%M:%S - ') + outString
-    print(outString)
+def tprint(out_string):
+    out_string = datetime.now().strftime('%m/%d/%y %H:%M:%S - ') + out_string
+    print(out_string)
 
 
 def find(source, start_str, end_str):
@@ -66,9 +66,9 @@ def setSetting(sid, value):
 
 
 def saveCookiesAsText():
-    cjT = cookielib.MozillaCookieJar(COOKIES_TXT_FILE)
+    cjT = http.cookiejar.MozillaCookieJar(COOKIES_TXT_FILE)
 
-    cj = cookielib.LWPCookieJar(COOKIES_LWP_FILE)
+    cj = http.cookiejar.LWPCookieJar(COOKIES_LWP_FILE)
     cj.load(COOKIES_LWP_FILE, ignore_discard=False)
     for cookie in cj:
         cjT.set_cookie(cookie)

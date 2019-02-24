@@ -1,7 +1,9 @@
+import argparse
+import logging
+
 from nhltv_lib.download_nhl import DownloadNHL
 from nhltv_lib.common import tprint, getSetting, which, wait, saveCookiesAsText
 from nhltv_lib.common import setSetting, createMandatoryFiles
-import argparse
 from nhltv_lib.teams import Teams
 from nhltv_lib.silenceskip import silenceSkip
 from nhltv_lib.video import reEncode
@@ -16,15 +18,15 @@ __author__ = "Clayton Maxwell && Helge Wehder"
 
 def main():
     """
-     Find the gameID or wait until one is ready
+     Find the game ID or wait until one is ready
     """
 
     createMandatoryFiles()
-    gameID = None
-    waitTimeInMin = 60
-    while (gameID is None) or (waitTimeInMin > 0):
+    game_id = None
+    wait_time_in_min = 60
+    while game_id is None or wait_time_in_min > 0:
         try:
-            gameID, contentID, eventID, waitTimeInMin = dl.getGameId()
+            game_id, content_id, event_id, wait_time_in_min = dl.get_game_id()
         except dl.NoGameFound:
             wait(reason="No new game.", minutes=24 * 60)
             continue
@@ -33,18 +35,18 @@ def main():
             wait(reason="Game has started but isn't available yet", minutes=10)
             continue
 
-        if waitTimeInMin > 0:
-            wait(reason="Game hasn't started yet.", minutes=waitTimeInMin)
+        if wait_time_in_min > 0:
+            wait(reason="Game hasn't started yet.", minutes=wait_time_in_min)
             continue
 
-        if gameID is None:
-            wait(reason="Did not find a gameID.", minutes=waitTimeInMin)
+        if game_id is None:
+            wait(reason="Did not find a game_id.", minutes=wait_time_in_min)
 
     # When one is found then fetch the stream and save the cookies for it
-    tprint('Fetching the stream URL')
+    logging.debug('Fetching the stream URL')
     while True:
         try:
-            stream_url, _, game_info = dl.fetchStream(gameID, contentID, eventID)
+            stream_url, _, game_info = dl.fetchStream(game_id, content_id, event_id)
             break
         except dl.BlackoutRestriction:
             wait(reason="Game is effected by NHL Game Center blackout restrictions.", minutes=12 * 60)
@@ -52,20 +54,20 @@ def main():
     saveCookiesAsText()
 
     tprint("Downloading stream_url")
-    outputFile = str(gameID) + '_raw.mkv'
+    outputFile = str(game_id) + '_raw.mkv'
     dl.download_nhl(stream_url, outputFile)
 
     # Update the settings to reflect that the game was downloaded
-    setSetting('lastGameID', gameID)
+    setSetting('lastGameID', game_id)
 
     # Remove silence
     tprint("Removing silence...")
-    newFileName = DOWNLOAD_FOLDER + game_info + "_" + str(gameID) + '.mkv'
+    newFileName = DOWNLOAD_FOLDER + game_info + "_" + str(game_id) + '.mkv'
     silenceSkip(outputFile, newFileName)
 
     if MOBILE_VIDEO is True:
         tprint("Re-encoding for phone...")
-        reEncode(newFileName, str(gameID) + '_phone.mkv')
+        reEncode(newFileName, str(game_id) + '_phone.mkv')
 
 
 def parse_args():

@@ -2,7 +2,7 @@ import subprocess
 from setuptools import setup
 
 # Lets get the version from git tag last one wins
-VERSION = subprocess.check_output(["git", "tag"]).rstrip().strip("v").split()[-1]
+VERSION = '1.0.0'
 
 setup(
     name='nhltv',
